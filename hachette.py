@@ -12,7 +12,6 @@ ssl._create_default_https_context = ssl._create_unverified_context
 email_addr = []
 src_email = "marvelcollectionsnews@gmail.com"
 title_list = []
-email_list = []
 first_run = True
 INTERVAL = 900
 
@@ -38,7 +37,23 @@ while True:
     # read every line from the webpage
     for rawline in response:
         line = rawline.decode('utf-8')
-        # this string appears 3 lines before the line we want
+
+        # check for invalid date
+        if 'On Sale Date:' in line:
+            try:
+                # convert the date string to a datetime object
+                date_string = line.replace('On Sale Date:','').replace('Sept','Sep').replace('June','Jun').replace('July','Jul').replace('April','Apr').replace('March','Mar').replace('.','').strip()
+                date_object = datetime.strptime(date_string, '%b %d, %Y')
+
+                # restart if any date is before today
+                if date_object < datetime.now():
+                    print("ERROR: invalid dates in source data")
+                    sleep_before_checking()
+                    break
+            except Exception as e:
+                print(str(e))
+
+        # this string appears 3 lines before the title
         if '<ul class="results-gallery">' in line:
             line_counter = 3
 
