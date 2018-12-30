@@ -14,6 +14,9 @@ src_email = "marvelcollectionsnews@gmail.com"
 title_list = []
 first_run = True
 INTERVAL = 900
+email_file = "emails.txt"
+
+print("Running script with email list: %s" % email_file)
 
 # read the password from a text file
 with open("password.txt", 'r') as f:
@@ -79,7 +82,7 @@ while True:
 """.format(len(email_list), "\n".join(email_list))
         
         # read the list of email addresses from a text file
-        with open("emails.txt", 'r') as f:
+        with open(email_file, 'r') as f:
             email_addr = f.read().splitlines()
             
         print("send email for {} new titles to {} users".format(len(email_list), len(email_addr)))
