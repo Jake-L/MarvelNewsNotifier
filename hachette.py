@@ -76,7 +76,9 @@ while True:
 
     # send the email with the new titles
     if len(email_list) > 0:
+        print("\n".join(email_list))
         message = """Subject: {} new Marvel collections posted on hachette
+
 {}
 \nIf you wish to stop receiving these emails, reply "UNSUBSCRIBE"
 """.format(len(email_list), "\n".join(email_list))
