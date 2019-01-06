@@ -12,6 +12,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 email_addr = []
 src_email = "marvelcollectionsnews@gmail.com"
 title_list = []
+isbn_list = []
 first_run = True
 INTERVAL = 900
 email_file = "emails.txt"
@@ -30,16 +31,17 @@ while True:
     email_list = []
     # try to open the url, and restart the loop if it fails
     try:
-        response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=100")
+        response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=100").readlines()
     except:
         print("Error accessing hachette site")
         sleep_before_checking()
         continue
-    line_counter = -1
+    
+    title = None
 
     # read every line from the webpage
-    for rawline in response:
-        line = rawline.decode('utf-8')
+    for i in range(len(response)):
+        line = response[i].decode('utf-8')
 
         # check for invalid date
         if 'On Sale Date:' in line:
@@ -58,20 +60,32 @@ while True:
 
         # this string appears 3 lines before the title
         if '<ul class="results-gallery">' in line:
-            line_counter = 3
+            title = response[i+3].strip().decode('utf-8')
 
-        if line_counter == 0:
-            title = line.strip()
-
+            # check if the title was seen previously
             if title not in title_list:
                 title_list.append(title)
+            else:
+                title = None
+        
+        # this string appears in the line before the ISBN
+        if 'ISBN: ' in line:
+            isbn = response[i+1].strip().decode('utf-8')
 
-                # don't send emails on the first run
-                if first_run == False:
-                    email_list.append(title.replace('&amp;','&').replace('&#39;',"'"))
+            # check if the isbn was seen previously
+            if isbn not in isbn_list:
+                isbn_list.append(isbn)
+            else:
+                title = None
 
-        if line_counter >= 0:
-            line_counter -= 1
+        # this string appears at the end of each title section
+        # so we add the title to the email list since all other checks have been run
+        if '<hr class="clear" />' in line:
+            # don't send emails on the first run
+            if title is not None and first_run == False:
+                email_list.append(title.replace('&amp;','&').replace('&#39;',"'"))
+                title = None
+
     first_run = False
 
     # send the email with the new titles
