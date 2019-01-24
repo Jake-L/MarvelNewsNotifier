@@ -31,7 +31,11 @@ while True:
     email_list = []
     # try to open the url, and restart the loop if it fails
     try:
-        response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=100").readlines()
+        if first_run:
+            # grab extra titles on the first run just in case a few disappear later
+            response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=200").readlines()
+        else:
+            response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=100").readlines()
     except:
         print("Error accessing hachette site")
         sleep_before_checking()
@@ -82,7 +86,7 @@ while True:
         # so we add the title to the email list since all other checks have been run
         if '<hr class="clear" />' in line:
             # don't send emails on the first run
-            if title is not None and first_run == False:
+            if title is not None and len(title) > 0 and first_run == False:
                 email_list.append(title.replace('&amp;','&').replace('&#39;',"'"))
                 title = None
 
