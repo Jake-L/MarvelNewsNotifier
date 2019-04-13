@@ -14,7 +14,7 @@ src_email = "marvelcollectionsnews@gmail.com"
 title_list = []
 isbn_list = []
 first_run = True
-INTERVAL = 900
+INTERVAL = 1200
 email_file = "emails.txt"
 
 print("Running script with email list: %s" % email_file)
@@ -33,9 +33,9 @@ while True:
     try:
         if first_run:
             # grab extra titles on the first run just in case a few disappear later
-            response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=200").readlines()
+            response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=250").readlines()
         else:
-            response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=100").readlines()
+            response = urlopen("https://www.hachettebookgroup.biz/search/?q=marvel&sort_by=-pub_date&results_per_page=150").readlines()
     except:
         print("Error accessing hachette site")
         sleep_before_checking()
@@ -56,7 +56,8 @@ while True:
 
                 # restart if any date is before today
                 if date_object < datetime.now():
-                    print("ERROR: invalid dates in source data")
+                    print("ERROR: invalid dates in source data: " + date_string)
+                    email_list = []
                     sleep_before_checking()
                     break
             except Exception as e:
@@ -116,7 +117,5 @@ while True:
             print("Error sending emails")
             sleep_before_checking()
             continue
-    else:
-        print("no new titles")
 
     sleep_before_checking()
